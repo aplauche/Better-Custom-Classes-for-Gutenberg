@@ -1,4 +1,4 @@
-=== EXIF Viewer ===
+=== Better Custom Classes for Gutenberg ===
 Contributors: Anton Plauche
 Tags: classes, custom, blocks, gutenberg, editor
 Requires at least: 6.0
