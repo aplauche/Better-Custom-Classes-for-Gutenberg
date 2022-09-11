@@ -1,0 +1,20 @@
+{
+  "name": "better-custom-classes-for-gutenberg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/X.git"
+  },
+  "author": "Anton Plauche",
+  "license": "ISC",
+  "homepage": "https://github.com/X/#readme",
+  "devDependencies": {
+    "@wordpress/scripts": "^24.0.0"
+  }
+}
