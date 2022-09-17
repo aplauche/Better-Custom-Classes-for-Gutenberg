@@ -1,7 +1,7 @@
 // Add Extra Controls
 import { ClipboardButton, TextControl, PanelBody, PanelRow } from '@wordpress/components';
-import { useState, Fragment, useEffect } from '@wordpress/element';
-import { InspectorAdvancedControls, InspectorControls } from '@wordpress/block-editor';
+import { useState, Fragment } from '@wordpress/element';
+import { InspectorControls } from '@wordpress/block-editor';
 
 
 const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
@@ -13,14 +13,16 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
     const [ customClassInput, setCustomClassInput ] = useState( "" );
 
     const convertToClassString = (arr) => {
+      if(arr.length < 1){
+        return ""
+      }
       return " " + arr.join(" ") + " "
     }
 
     const currentClassArray = (str) => {
-      if(typeof attributes.className !== 'undefined'){
+      if(typeof attributes.className !== 'undefined' && attributes.className.trim() !== ""){
         return attributes.className.trim().split(" ")
       } 
-
       return []
     }
 
@@ -67,7 +69,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 			<Fragment>
 				<BlockEdit {...props} />
 				{/* {isSelected && (props.name == 'core/cover') &&  */}
-				{isSelected &&  
+				{isSelected && 
 					<InspectorControls>
             <PanelBody title="Custom Classes" initialOpen={true}>
               <PanelRow>
