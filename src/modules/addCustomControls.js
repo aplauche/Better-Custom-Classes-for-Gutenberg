@@ -7,7 +7,6 @@ import { InspectorControls } from '@wordpress/block-editor';
 const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 	return (props) => {
 
-    console.log(props)
 		const { attributes, setAttributes, isSelected } = props;
     const [ hasCopied, setHasCopied ] = useState( false );
     const [ customClassInput, setCustomClassInput ] = useState( "" );
