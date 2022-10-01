@@ -1,7 +1,8 @@
 // Add Extra Controls
-import { ClipboardButton, TextControl, PanelBody, PanelRow } from '@wordpress/components';
+import { TextControl, PanelBody, PanelRow, Button } from '@wordpress/components';
 import { useState, Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
+import { useCopyToClipboard } from './hooks';
 
 
 const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
@@ -10,6 +11,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 		const { attributes, setAttributes, isSelected } = props;
     const [ hasCopied, setHasCopied ] = useState( false );
     const [ customClassInput, setCustomClassInput ] = useState( "" );
+    const [copiedText, copy] = useCopyToClipboard();
 
     const convertToClassString = (arr) => {
       if(arr.length < 1){
@@ -18,7 +20,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       return " " + arr.join(" ") + " "
     }
 
-    const currentClassArray = (str) => {
+    const currentClassArray = () => {
       if(typeof attributes.className !== 'undefined' && attributes.className.trim() !== ""){
         return attributes.className.trim().split(" ")
       } 
@@ -64,6 +66,14 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
     }
 
 
+    const handleCopy = () => {
+      setHasCopied(true)
+      copy(attributes.className)
+      setTimeout(() => {
+        setHasCopied(false)
+      }, 2000)
+    }
+
 		return (
 			<Fragment>
 				<BlockEdit {...props} />
@@ -106,14 +116,12 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
               {currentClassArray().length > 0 && 
                 // If custom classes exist show a copy to clipboard button to allow easy copying between blocks
                 <PanelRow>
-                  <ClipboardButton
-                      variant="primary"
-                      text={attributes.className}
-                      onCopy={ () => setHasCopied( true ) }
-                      onFinishCopy={ () => setHasCopied( false ) }
+                  <Button
+                    variant="primary"
+                    onClick={() => handleCopy()}
                   >
-                      { hasCopied ? 'Copied!' : 'Copy All Classes' }
-                  </ClipboardButton>
+                    { hasCopied ? 'Copied!' : 'Copy All Classes' }
+                  </Button>
                 </PanelRow>
               }
             </PanelBody>

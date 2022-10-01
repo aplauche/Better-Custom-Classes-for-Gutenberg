@@ -17,6 +17,7 @@ export const useCopyToClipboard = () => {
       return true
     } catch (error) {
       console.warn('Copy failed', error)
+      alert('Sorry, an error occured. You can always copy classes from the legacy advanced options text field.')
       setCopiedText(null)
       return false
     }
