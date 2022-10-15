@@ -4,14 +4,30 @@ import { useState, Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
 import { useCopyToClipboard } from './hooks';
 
+import { store as blocksStore } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 
 const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
+
 	return (props) => {
 
-		const { attributes, setAttributes, isSelected } = props;
+		const { name, attributes, setAttributes, isSelected } = props;
     const [ hasCopied, setHasCopied ] = useState( false );
     const [ customClassInput, setCustomClassInput ] = useState( "" );
     const [copiedText, copy] = useCopyToClipboard();
+
+    const blockSupportValue = useSelect(
+      ( select ) =>
+          select( blocksStore ).getBlockSupport( name, 'customClassName' ),
+      [name]
+    );
+
+    if(blockSupportValue === false){
+      // Bail out - no support
+      return <BlockEdit {...props} />
+    }
+
+    console.log(blockSupportValue)
 
     const convertToClassString = (arr) => {
       if(arr.length < 1){
@@ -77,7 +93,6 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 		return (
 			<Fragment>
 				<BlockEdit {...props} />
-				{/* {isSelected && (props.name == 'core/cover') &&  */}
 				{isSelected && 
 					<InspectorControls>
             <PanelBody title="Custom Classes" initialOpen={true}>
