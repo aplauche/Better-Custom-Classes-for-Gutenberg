@@ -1,12 +1,12 @@
 <?php
 /**
- * @version 0.1
+ * @version 0.1.1
  */
 /*
   Plugin Name: Better Custom Classes for Gutenberg
   Description: A better interface for applying custom classes to blocks in the gutenberg editor.
   Author: Anton Plauche
-  Version: 0.1
+  Version: 0.1.1
   Author URI: https://antonplauche.com
 */
 

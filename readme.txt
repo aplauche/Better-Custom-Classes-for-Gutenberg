@@ -3,7 +3,6 @@ Contributors: Anton Plauche
 Tags: classes, custom, blocks, gutenberg, editor
 Requires at least: 6.0
 Tested up to: 6.0
-Stable tag: 0.1
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,5 +22,8 @@ On deactivation, classes will persist, but in the legacy Custom Class field unde
 2. An invalid class highlighted where the user added a period
 
 == Changelog ==
+= 0.1.1 =
+* Add a filter to bail out if block does not support customClassName
+
 = 0.1 =
 * Initial plugin release
