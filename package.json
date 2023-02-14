@@ -16,5 +16,8 @@
   "homepage": "https://github.com/X/#readme",
   "devDependencies": {
     "@wordpress/scripts": "^24.0.0"
+  },
+  "dependencies": {
+    "@wordpress/icons": "^9.17.0"
   }
 }

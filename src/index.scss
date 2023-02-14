@@ -23,9 +23,54 @@
     color: rgb(139, 139, 139)
   }
 
+  // &.better-custom-classes__pill--library {
+  //   background: lightgreen;
+  //   .bccfg-remember {
+  //     display: inline-block;
+  //     width: 10px;
+  //     height: 10px;
+  //     border-radius: 10px;
+  //     background: forestgreen;
+  //   }
+  // }
+
+  // .bccfg-remember {
+  //   display: inline-block;
+  //   width: 10px;
+  //   height: 10px;
+  //   border-radius: 10px;
+  //   background: slategray;
+  // }
+
   svg {
+    display: block;
+    cursor: pointer;
+  }
+
+  .better-custom-classes__pill-delete {
     width: 8px;
     height: 8px;
+    margin-left: 4px;
     cursor: pointer;
+  }
+}
+
+.bccfg-suggestions {
+  background: #f5f5f5;
+  width: 100%;
+  margin-top: -20px;
+  max-height: 400px;
+  overflow-y: auto;
+
+
+  li {
+    //border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    padding: 6px 8px;
+    margin: 0;
+
+    &:hover {
+      background: #ddd;
+    }
   }
 }
