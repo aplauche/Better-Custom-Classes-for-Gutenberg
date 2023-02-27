@@ -47,7 +47,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       if(customClassInput.length > 2){
 
         // only classes that match input
-        let filtered = classLibrary.split(',').filter(item => {
+        let filtered = classLibrary?.split(',').filter(item => {
           return item.includes(customClassInput)
         })
 
@@ -135,7 +135,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 
     const handleRememberClick = (item) => {
         // If no classes exist yet just add directly
-        if(classLibrary === ""){
+        if(!classLibrary || classLibrary === ""){
           setClassLibrary(item)
           saveEditedEntityRecord( 'root', 'site', undefined, {
             bccfg_class_library: item,
@@ -195,7 +195,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
                   {currentClassArray().map((item, idx) => (
                     // Check agaist regex and add an error class to highlight if classname contains illegal chars
                     <div key={idx} className={`better-custom-classes__pill ${item.search(regexp) === -1 ? 'better-custom-classes__pill--error' : ''}`}>
-                      {classLibrary.split(',').includes(item) ? (
+                      {classLibrary && classLibrary.split(',').includes(item) ? (
                         <Icon width={20} height={20} icon={ starFilled } onClick={() => handleDontRememberClick(item)}/>
                       ) : (
                         <Icon width={20} height={20} icon={ starEmpty } onClick={() => handleRememberClick(item)}/>
