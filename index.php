@@ -27,8 +27,8 @@ class BetterCustomClassesForGutenberg {
     add_action( 'admin_init', array($this, 'add_settings'));
     add_action( 'rest_api_init', array($this, 'add_settings') );
     add_action('admin_menu', array($this, 'menu_page'));
-    add_action( 'admin_post_nopriv_process_form', array($this, 'handle_class_library_submit') );
-    add_action( 'admin_post_process_form', array($this, 'handle_class_library_submit') );
+    add_action( 'admin_post_nopriv_bccfg_class_library_form', array($this, 'handle_class_library_submit') );
+    add_action( 'admin_post_bccfg_class_library_form', array($this, 'handle_class_library_submit') );
   }
 
   /**
@@ -103,7 +103,7 @@ class BetterCustomClassesForGutenberg {
             <div>
               <textarea name="class-list" rows="8" cols="50"><?php echo $classList ? esc_html( trim( $classList ) ) : '' ; ?></textarea>
             </div>
-            <input type="hidden" name="action" value="process_form">			 
+            <input type="hidden" name="action" value="bccfg_class_library_form">			 
             <input type="submit" name="submit" id="submit" class="update-button button button-primary" value="Update Classes"  />
         </form> 
     </div>
@@ -131,7 +131,9 @@ class BetterCustomClassesForGutenberg {
                   add_option('bccfg_class_library', $classList);
               }
           }
-          wp_redirect('/wp-admin/tools.php?page=bccfg-class-library-settings&status=1');
+          wp_redirect($_SERVER['HTTP_REFERER'] . '&status=1');
+        } else {
+          wp_die("You do not have permission to view this page.");
         }
   }
 }
