@@ -82,7 +82,6 @@ class BetterCustomClassesForGutenberg {
   function library_save_callback(){
 
         $classList = get_option('bccfg_class_library');
-        var_dump($classList);
 
         ?>
         <div class="wrap"><div id="icon-tools" class="icon32"></div>
