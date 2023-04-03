@@ -31,6 +31,11 @@ class BetterCustomClassesForGutenberg {
     add_action( 'admin_post_bccfg_class_library_form', array($this, 'handle_class_library_submit') );
   }
 
+  // Utility for sanitizing an array of class attributes
+  function sanitize_array_of_classes( $array ) {
+    return array_map( 'sanitize_html_class', $array );
+  }
+
   /**
    * Enqueue JS for editor 
    * Enqueue custom styles within block editor for added settings pane
@@ -51,18 +56,13 @@ class BetterCustomClassesForGutenberg {
       }
   }
 
-  // function sanitize_array_of_strings( $array ) {
-  //   return array_map( 'sanitize_text_field', $array );
-  // }
-
   function add_settings(){
     /**
     * Registers a text field setting for Wordpress 4.7 and higher.
     **/
     $args = array(
       'type' => 'array', 
-      // TODO: create a namespaced callback to sanitize on save
-      //'sanitize_callback' => '__return_true',
+      'sanitize_callback' => [$this, 'sanitize_array_of_classes'],
       'show_in_rest' => true
     );
     register_setting( 'general', 'bccfg_class_library', $args ); 
@@ -134,9 +134,8 @@ class BetterCustomClassesForGutenberg {
               $classList = explode(',', $classListString);
 
               // Map over array and validate that each is a valid class name attribute
-              $classList = array_map(function($item){
-                return sanitize_html_class($item);
-              }, $classList);
+              // Not really needed since we have sanitize callback, but doesn't hurt either
+              $classList = $this->sanitize_array_of_classes($classList);
       
               // Add or update the option
               $option_exists = get_option('bccfg_class_library');
