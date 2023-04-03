@@ -47,19 +47,24 @@ class BetterCustomClassesForGutenberg {
 
       // on first activation will return false
       if(!$options){
-        add_option( 'bccfg_class_library', '');
+        add_option( 'bccfg_class_library', array());
       }
   }
+
+  // function sanitize_array_of_strings( $array ) {
+  //   return array_map( 'sanitize_text_field', $array );
+  // }
 
   function add_settings(){
     /**
     * Registers a text field setting for Wordpress 4.7 and higher.
     **/
     $args = array(
-      'type' => 'string', 
-      'sanitize_callback' => 'sanitize_text_field',
+      'type' => 'array', 
+      // TODO: create a namespaced callback to sanitize on save
+      //'sanitize_callback' => '__return_true',
       'show_in_rest' => true
-      );
+    );
     register_setting( 'general', 'bccfg_class_library', $args ); 
 
   }
@@ -77,6 +82,7 @@ class BetterCustomClassesForGutenberg {
   function library_save_callback(){
 
         $classList = get_option('bccfg_class_library');
+        var_dump($classList);
 
         ?>
         <div class="wrap"><div id="icon-tools" class="icon32"></div>
@@ -101,7 +107,7 @@ class BetterCustomClassesForGutenberg {
             <?php wp_nonce_field( 'bccfg_options_verify', 'bccfg_update_library'); ?>
 
             <div>
-              <textarea name="class-list" rows="8" cols="50"><?php echo $classList ? esc_html( trim( $classList ) ) : '' ; ?></textarea>
+              <textarea name="class-list" rows="8" cols="50"><?php echo $classList ? esc_html( trim( implode(',', $classList) ) ) : '' ; ?></textarea>
             </div>
             <input type="hidden" name="action" value="bccfg_class_library_form">			 
             <input type="submit" name="submit" id="submit" class="update-button button button-primary" value="Update Classes"  />
@@ -120,9 +126,20 @@ class BetterCustomClassesForGutenberg {
       
           if (isset($_POST['class-list'])) {
 
-              $classList = trim(sanitize_text_field( $_POST['class-list'] ));
+            preg_replace('/\W+/','',strtolower(strip_tags($item)));
 
+              // trim and sanitize
+              $classListString = trim(sanitize_text_field( $_POST['class-list'] ));
+
+              // convert to an array of the classes
+              $classList = explode(',', $classListString);
+
+              // Map over array and validate that each is a valid class name attribute
+              $classList = array_map(function($item){
+                return sanitize_html_class($item);
+              }, $classList);
       
+              // Add or update the option
               $option_exists = get_option('bccfg_class_library');
       
               if (!empty($classList) && !empty($option_exists)) {
