@@ -12,10 +12,12 @@ Better Custom Classes for Gutenberg adds a new custom classes pane in the block 
 Adds an extra "Custom Classes" pane to gutenberg blocks that behaves similar to tags. This allows for easy entry, deletion, and managment of utility classes on your blocks. A regex validator highlights classes that may be invalid. A "Copy All" button is also added for quickly transferring classes between blocks.
 On deactivation, classes will persist, but in the legacy Custom Class field under the advanced pane.
 
+Clicking the star icon on a class will toggle whether to include it in your class library. This makes it show up as an autocomplete when applying classes to other blocks. You can view all the classes in your library on the dedicated class library settings page in the admin.
+
 == Installation ==
 1. Extract better-custom-classes-for-gutenberg.zip
-1. Upload the plugin folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the \'Plugins\' menu in WordPress
+2. Upload the plugin folder to the `/wp-content/plugins/` directory
+3. Activate the plugin through the \'Plugins\' menu in WordPress
 
 == Screenshots ==
 1. Easily viewing classes with the Custom Class Pane
