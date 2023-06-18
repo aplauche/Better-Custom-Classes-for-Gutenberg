@@ -53,6 +53,9 @@ class BetterCustomClassesForGutenberg {
       // on first activation will return false
       if(!$options){
         add_option( 'bccfg_class_library', array());
+      } else if (!is_array($options)) {
+        delete_option( 'bccfg_class_library' );
+        add_option( 'bccfg_class_library', array());
       }
   }
 
@@ -82,6 +85,12 @@ class BetterCustomClassesForGutenberg {
   function library_save_callback(){
 
         $classList = get_option('bccfg_class_library');
+
+        if(!is_array($classList)){
+          $classList = [];
+        }
+
+
 
         ?>
         <div class="wrap"><div id="icon-tools" class="icon32"></div>
