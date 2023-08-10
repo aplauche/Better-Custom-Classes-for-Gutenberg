@@ -24,6 +24,10 @@ Clicking the star icon on a class will toggle whether to include it in your clas
 2. An invalid class highlighted where the user added a period
 
 == Changelog ==
+
+= 0.1.2 =
+* Fix bug with WP 6.3 where saving on general options page throws error
+
 = 0.1.1 =
 * Add a filter to bail out if block does not support customClassName
 

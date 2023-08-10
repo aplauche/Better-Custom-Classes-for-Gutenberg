@@ -1,18 +1,17 @@
 <?php
 /**
- * @version 0.1.1
+ * @version 0.1.2
  */
 /*
   Plugin Name: Better Custom Classes for Gutenberg
   Description: A better interface for applying custom classes to blocks in the gutenberg editor.
   Author: Anton Plauche
-  Version: 0.1.1
+  Version: 0.1.2
   Author URI: https://antonplauche.com
 */
 
 if( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Uses class instantiation for namespacing
 class BetterCustomClassesForGutenberg {
 
   /**
@@ -32,7 +31,7 @@ class BetterCustomClassesForGutenberg {
   }
 
   // Utility for sanitizing an array of class attributes
-  function sanitize_array_of_classes( $array ) {
+  function sanitize_array_of_classes( array $array ) {
     return array_map( 'sanitize_html_class', $array );
   }
 
@@ -68,7 +67,8 @@ class BetterCustomClassesForGutenberg {
       'sanitize_callback' => [$this, 'sanitize_array_of_classes'],
       'show_in_rest' => true
     );
-    register_setting( 'general', 'bccfg_class_library', $args ); 
+    register_setting( 'bccfg-class-library-settings', 'bccfg_class_library', $args ); 
+
 
   }
 
@@ -82,6 +82,7 @@ class BetterCustomClassesForGutenberg {
       array($this, 'library_save_callback') );
   }
 
+
   function library_save_callback(){
 
         $classList = get_option('bccfg_class_library');
@@ -89,8 +90,6 @@ class BetterCustomClassesForGutenberg {
         if(!is_array($classList)){
           $classList = [];
         }
-
-
 
         ?>
         <div class="wrap"><div id="icon-tools" class="icon32"></div>
@@ -110,6 +109,7 @@ class BetterCustomClassesForGutenberg {
         <form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="POST">
 
             <h3>Your remembered classes:</h3>
+            <p>You can enter a list of comma-seperated classes here to populate your autocomplete class library.</p>
 
             <!-- The nonce field is a security feature to avoid submissions from outside WP admin -->
             <?php wp_nonce_field( 'bccfg_options_verify', 'bccfg_update_library'); ?>
