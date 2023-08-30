@@ -25,6 +25,9 @@ Clicking the star icon on a class will toggle whether to include it in your clas
 
 == Changelog ==
 
+= 0.1.3 =
+* Add colon to supported class characters for tailwind utils etc.
+
 = 0.1.2 =
 * Fix bug with WP 6.3 where saving on general options page throws error
 

@@ -36,7 +36,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
     }
 
     // Regex to validate classes added do not contain illegal characters
-    const regexp = /^[a-zA-Z0-9-_]+$/;
+    const regexp = /^[a-zA-Z0-9-_:]+$/;
 
     // Access class library for autocomplete
     const [classLibrary, setClassLibrary] = useEntityProp('root', 'site', 'bccfg_class_library')
