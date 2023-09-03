@@ -6,7 +6,8 @@
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
-    "plugin-zip": "wp-scripts plugin-zip"
+    "plugin-zip": "wp-scripts plugin-zip",
+    "wp-env": "wp-env"
   },
   "repository": {
     "type": "git",
@@ -16,9 +17,11 @@
   "license": "ISC",
   "homepage": "https://github.com/X/#readme",
   "devDependencies": {
-    "@wordpress/scripts": "^24.0.0"
+    "@wordpress/env": "^8.7.0"
   },
   "dependencies": {
-    "@wordpress/icons": "^9.17.0"
+    "@wordpress/core-data": "^6.18.0",
+    "@wordpress/icons": "^9.17.0",
+    "@wordpress/scripts": "^26.12.0"
   }
 }

@@ -1,14 +1,16 @@
-// Add Extra Controls
+import { InspectorControls } from '@wordpress/block-editor';
 import { TextControl, PanelBody, PanelRow, Button } from '@wordpress/components';
 import { Icon, starFilled, starEmpty } from '@wordpress/icons';
+
 import { useState, Fragment, useEffect } from '@wordpress/element';
-import { InspectorControls } from '@wordpress/block-editor';
-import { useCopyToClipboard } from './hooks';
 
 import { store as blocksStore } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useEntityProp } from '@wordpress/core-data';
-import { store as coreStore } from '@wordpress/core-data';
+import { useEntityProp, store as coreStore } from '@wordpress/core-data';
+
+import TokenList from '@wordpress/token-list';
+
+import { useCopyToClipboard } from './hooks';
 
 
 
@@ -23,6 +25,25 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 
     const { saveEditedEntityRecord } = useDispatch( coreStore );
 
+    // Regex to validate classes added do not contain illegal characters
+    const regexp = /^[a-zA-Z0-9-_:]+$/;
+
+    // Access class library for autocomplete
+    const [classLibrary, setClassLibrary] = useEntityProp('root', 'site', 'bccfg_class_library')
+    const [suggestions, setSuggestions] = useState([])
+
+    // UTILITY FUNCTIONS
+
+    // utility to provide classlist as array
+    const currentClassArray = () => {
+
+      if(typeof attributes.className !== 'undefined' && attributes.className.trim() !== ""){
+        return attributes.className.trim().split(" ")
+      } 
+
+      return []
+    }
+
     // Check for block support and bail out if none exists
     const blockSupportValue = useSelect(
       ( select ) =>
@@ -35,20 +56,14 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       return <BlockEdit {...props} />
     }
 
-    // Regex to validate classes added do not contain illegal characters
-    const regexp = /^[a-zA-Z0-9-_:]+$/;
-
-    // Access class library for autocomplete
-    const [classLibrary, setClassLibrary] = useEntityProp('root', 'site', 'bccfg_class_library')
-    const [suggestions, setSuggestions] = useState([])
 
     // Filter possible suggestions
     useEffect(() => {
       if(customClassInput.length > 2){
 
-        // only classes that match input
+        // only classes that match input - we lowercase all just to include suggestions that are not case matched
         let filtered = classLibrary?.filter(item => {
-          return item.includes(customClassInput)
+          return item.toLowerCase().includes(customClassInput.toLowerCase())
         })
 
         // only classes that aren't already there
@@ -63,44 +78,22 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 
     }, [customClassInput, classLibrary])
 
-
-    // Utitilty to convert class to string
-    const convertToClassString = (arr) => {
-      if(arr.length < 1){
-        return ""
-      }
-      return " " + arr.join(" ") + " "
-    }
-
-    // utility to provide classlist as array
-    const currentClassArray = () => {
-      if(typeof attributes.className !== 'undefined' && attributes.className.trim() !== ""){
-        return attributes.className.trim().split(" ")
-      } 
-      return []
-    }
-
-    // utility to provide classlist as a unique set
-    const classSet = (classString) => {
-      return new Set(classString.trim().split(" "))
-    }
-
-
-    // Listen to keydown and add classes on spacebar or enter key
+    // Listen to keydown and add classes on spacebar or enter or comma key
     const onKeyDown = (e) => {
       if(customClassInput.trim().length){
 
-        // split in case user copies in multiple classes
-        let classesToAdd = customClassInput.trim().split(" ").filter(classToAdd => {
-          // filter out classes that are already there
-          return !currentClassArray().includes(classToAdd)
-        })
+        // Create token list of input and current library
+        let classesToAdd = new TokenList(customClassInput)
+        let blockClassList = new TokenList(attributes.className)
+
+        // add in tokens from input (automatically handles duplicates)
+        blockClassList.add(classesToAdd)
   
-        if ((e.keyCode === 32 || e.keyCode === 13)) {
+        if ((e.keyCode === 32 || e.keyCode === 13 || e.keyCode === 188)) {
           e.preventDefault();
 
           // Merge in new classes
-          setAttributes({className: convertToClassString([...currentClassArray(), ...classesToAdd])})
+          setAttributes({className: blockClassList.value})
 
           // empty out input
           setCustomClassInput("")
@@ -109,14 +102,57 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       }
     };
 
-    const handleDelete = (deletedClass) => {
-      let modified = classSet(attributes.className)
-      if(modified.has(deletedClass)){
-        modified.delete(deletedClass)
-      }
-      setAttributes({className: convertToClassString([...modified])})
+    const handleSuggestionClick = (term) => {
+
+      let blockClassList = new TokenList(attributes.className)
+      blockClassList.add(term)
+
+      setAttributes({className: blockClassList.value})
+
+      // empty out input
+      setCustomClassInput("")
     }
 
+    const handleDelete = (deletedClass) => {
+
+      let blockClassList = new TokenList(attributes.className)
+      blockClassList.remove(deletedClass)
+
+      setAttributes({className: blockClassList.value})
+    }
+
+
+    // Handlers for the remember/don't remember logic
+
+    const updateLibrary = (newLibrary) => {
+      setClassLibrary(newLibrary)
+      saveEditedEntityRecord( 'root', 'site', undefined, {
+        bccfg_class_library: newLibrary,
+      } );
+    }
+
+    const handleRememberClick = (item) => {
+        // If no classes exist yet just add directly
+        if(!classLibrary || classLibrary.length < 1){
+          updateLibrary([item])
+          return;
+        }
+
+        // otherwise merge into array
+        let classLibraryTokenList = new TokenList(classLibrary.join(" "))
+        classLibraryTokenList.add(item)
+
+        const newArray = classLibraryTokenList.value.split(" ")
+        
+        updateLibrary(newArray)
+    }
+
+    const handleDontRememberClick = (item) => {
+      const newArray = classLibrary.filter(term => {
+        return term !== item
+      })
+      updateLibrary(newArray)
+    }
 
     const handleCopy = () => {
       setHasCopied(true)
@@ -124,41 +160,6 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       setTimeout(() => {
         setHasCopied(false)
       }, 2000)
-    }
-
-    const handleSuggestionClick = (term) => {
-        // Merge in new classes
-        setAttributes({className: convertToClassString([...currentClassArray(), term])})
-        // empty out input
-        setCustomClassInput("")
-    }
-
-    const handleRememberClick = (item) => {
-        // If no classes exist yet just add directly
-        if(!classLibrary || classLibrary.length < 1){
-          setClassLibrary([item])
-          saveEditedEntityRecord( 'root', 'site', undefined, {
-            bccfg_class_library: [item],
-          } );
-          return;
-        }
-
-        // otherwise merge into array
-        const newArray = [...classLibrary, item]
-        setClassLibrary(newArray)
-        saveEditedEntityRecord( 'root', 'site', undefined, {
-            bccfg_class_library: newArray,
-        } );
-    }
-
-    const handleDontRememberClick = (item) => {
-      const newArray = classLibrary.filter(term => {
-        return term !== item
-      })
-      setClassLibrary(newArray)
-      saveEditedEntityRecord( 'root', 'site', undefined, {
-        bccfg_class_library: newArray,
-      });
     }
 
 		return (

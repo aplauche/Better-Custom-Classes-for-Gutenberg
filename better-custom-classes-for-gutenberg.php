@@ -24,13 +24,24 @@ class BetterCustomClassesForGutenberg
   function __construct()
   {
     $this->assetInfo = include(plugin_dir_path(__FILE__) . 'build/index.asset.php');
-    add_action('enqueue_block_editor_assets', array($this, 'adminAssets'));
+    $this->adminAssetInfo = include(plugin_dir_path(__FILE__) . 'build/admin.asset.php');
+
+    // Enqueue Scripts for editor and admin
+    add_action('admin_enqueue_scripts', array($this, 'adminAssets'));
+    add_action('enqueue_block_editor_assets', array($this, 'editorAssets'));
+
+    // Register the class library menu page
+    add_action('admin_menu', array($this, 'menu_page'));
+
+    // Activation script to register option
     add_action('activate_plugin', array($this, 'on_activate'));
+
+    // Add our setting to the REST API
     add_action('admin_init', array($this, 'add_settings'));
     add_action('rest_api_init', array($this, 'add_settings'));
-    add_action('admin_menu', array($this, 'menu_page'));
-    add_action('admin_post_nopriv_bccfg_class_library_form', array($this, 'handle_class_library_submit'));
-    add_action('admin_post_bccfg_class_library_form', array($this, 'handle_class_library_submit'));
+
+    // add_action('admin_post_nopriv_bccfg_class_library_form', array($this, 'handle_class_library_submit'));
+    // add_action('admin_post_bccfg_class_library_form', array($this, 'handle_class_library_submit'));
   }
 
   // Utility for sanitizing an array of class attributes
@@ -40,10 +51,26 @@ class BetterCustomClassesForGutenberg
   }
 
   /**
+   * Enqueue JS for admin page class library 
+   */
+  function adminAssets($hook)
+  {
+
+    //var_dump($hook);
+    // Load only on /tools.php?page=bccfg-class-library-settings.
+    if ( 'tools_page_bccfg-class-library-settings' !== $hook ) {
+        return;
+    }
+
+    wp_enqueue_script('custom-class-library-script', plugin_dir_url(__FILE__) . 'build/admin.js', $this->adminAssetInfo['dependencies'], $this->adminAssetInfo['version'], true);
+    wp_enqueue_style('custom-class-library-styles', plugin_dir_url(__FILE__) . 'build/admin.css', array(), $this->adminAssetInfo['version']);
+  }
+
+  /**
    * Enqueue JS for editor 
    * Enqueue custom styles within block editor for added settings pane
    */
-  function adminAssets()
+  function editorAssets($hook)
   {
     wp_enqueue_script('custom-class-filters', plugin_dir_url(__FILE__) . 'build/index.js', $this->assetInfo['dependencies'], $this->assetInfo['version']);
     wp_enqueue_style('custom-class-styles', plugin_dir_url(__FILE__) . 'build/index.css', array(), $this->assetInfo['version']);
@@ -64,19 +91,6 @@ class BetterCustomClassesForGutenberg
     }
   }
 
-  function add_settings()
-  {
-    /**
-     * Registers a text field setting for Wordpress 4.7 and higher.
-     **/
-    $args = array(
-      'type' => 'array',
-      'sanitize_callback' => [$this, 'sanitize_array_of_classes'],
-      'show_in_rest' => true
-    );
-    register_setting('bccfg-class-library-settings', 'bccfg_class_library', $args);
-  }
-
   function menu_page()
   {
     add_submenu_page(
@@ -85,11 +99,52 @@ class BetterCustomClassesForGutenberg
       'Class Library',
       'manage_options',
       'bccfg-class-library-settings',
-      array($this, 'library_save_callback')
+      array($this, 'render_menu_page')
     );
   }
 
+  function render_menu_page(){
+    ?>
+    <h2>Class Library</h2>
+    <div id="bccfg-library-app"></div>
+    <?php
+  }
 
+  function add_settings()
+  {
+    /**
+     * Registers a text field setting for Wordpress 4.7 and higher.
+     **/
+    $args = array(
+      'type' => 'array',
+      'sanitize_callback' => [$this, 'sanitize_array_of_classes'],
+      'show_in_rest' => array(
+        'schema' => array(
+          'type'  => 'array',
+          'items' => array(
+            'type' => 'string',
+          ),
+        ),
+      )
+    );
+    register_setting('bccfg-class-library-settings', 'bccfg_class_library', $args);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   function library_save_callback()
   {
 
@@ -99,38 +154,38 @@ class BetterCustomClassesForGutenberg
       $classList = [];
     }
 
-?>
-    <div class="wrap">
-      <div id="icon-tools" class="icon32"></div>
-      <h2>Gutenberg Class Library</h2>
-      <?php
+    ?>
+        <div class="wrap">
+          <div id="icon-tools" class="icon32"></div>
+          <h2>Gutenberg Class Library</h2>
+          <?php
 
-      // Check if status is 1 which means a successful options save just happened
-      if (isset($_GET['status']) && $_GET['status'] == 1) : ?>
+          // Check if status is 1 which means a successful options save just happened
+          if (isset($_GET['status']) && $_GET['status'] == 1) : ?>
 
-        <div class="notice notice-success inline">
-          <p>Options Saved!</p>
+            <div class="notice notice-success inline">
+              <p>Options Saved!</p>
+            </div>
+
+          <?php endif;
+
+          ?>
+          <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
+
+            <h3>Your remembered classes:</h3>
+            <p>You can enter a list of comma-seperated classes here to populate your autocomplete class library.</p>
+
+            <!-- The nonce field is a security feature to avoid submissions from outside WP admin -->
+            <?php wp_nonce_field('bccfg_options_verify', 'bccfg_update_library'); ?>
+
+            <div>
+              <textarea name="class-list" rows="8" cols="50"><?php echo $classList ? esc_html(trim(implode(',', $classList))) : ''; ?></textarea>
+            </div>
+            <input type="hidden" name="action" value="bccfg_class_library_form">
+            <input type="submit" name="submit" id="submit" class="update-button button button-primary" value="Update Classes" />
+          </form>
         </div>
-
-      <?php endif;
-
-      ?>
-      <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
-
-        <h3>Your remembered classes:</h3>
-        <p>You can enter a list of comma-seperated classes here to populate your autocomplete class library.</p>
-
-        <!-- The nonce field is a security feature to avoid submissions from outside WP admin -->
-        <?php wp_nonce_field('bccfg_options_verify', 'bccfg_update_library'); ?>
-
-        <div>
-          <textarea name="class-list" rows="8" cols="50"><?php echo $classList ? esc_html(trim(implode(',', $classList))) : ''; ?></textarea>
-        </div>
-        <input type="hidden" name="action" value="bccfg_class_library_form">
-        <input type="submit" name="submit" id="submit" class="update-button button button-primary" value="Update Classes" />
-      </form>
-    </div>
-<?php }
+    <?php }
 
   function handle_class_library_submit()
   {
