@@ -1,33 +1,56 @@
+// Admin Page Styles
+
+.bccfg-intro {
+  margin-bottom: 32px;
+
+  h2 {
+    margin-bottom: 0;
+  }
+
+  p {
+    margin-top: 8px;
+  }
+}
+
+#bccfg-library-app {
+  background: white;
+  box-shadow: 2px 2px 12px rgba(0,0,0,0.15);
+  padding: 2rem 1.5rem;
+  border-radius: 8px;
+
+  input {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
 .better-custom-classes__pill-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding-top: 16px;
+  gap: 8px;
+  padding: 16px;
   margin-top: 16px;
-  border-top: 1px solid white;
+  border-radius: 8px;
+  background: #f0f0f1;
+  margin-bottom: 50px;
+  box-shadow: inset 1px 1px 4px rgba(0,0,0,0.15);
 }
 
 .better-custom-classes__pill {
   display: flex;
   width: auto;
-  padding: 4px 8px;
-  background: rgb(221, 221, 221);
+  padding: 6px 10px;
+  background: white;
   border-radius: 2px;
   gap: 4px;
   align-items: center;
-
-  &.better-custom-classes__pill--error {
-    background: #ff95a0;
-  }
-
-  &.better-custom-classes__pill--disabled {
-    background: rgb(235, 235, 235);
-    color: rgb(139, 139, 139)
-  }
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.15);
 
   svg {
     display: block;
     cursor: pointer;
+
   }
 
   .better-custom-classes__pill-delete {
@@ -38,11 +61,4 @@
   }
 }
 
-#bccfg-library-app {
-  max-width: 800px;
-  
-  input {
-    display: block;
-  }
-}
 

@@ -103,15 +103,21 @@ class BetterCustomClassesForGutenberg
 
   function render_menu_page(){
     ?>
-    <h2>Class Library</h2>
-    <div id="bccfg-library-app"></div>
+    <div class="wrap">
+      <h1 style="margin-bottom: 16px;">Class Library</h1>
+      <div class="bccfg-intro">
+        <h2>Manage your class library</h2>
+        <p>Classes added here will populate your auto-complete field globally within the block editor.</p>
+      </div>
+      <div id="bccfg-library-app"></div>
+    </div>
     <?php
   }
 
   function add_settings()
   {
     /**
-     * Registers a text field setting for Wordpress 4.7 and higher.
+     * Registers a setting for Wordpress 4.7 and higher.
      **/
     $args = array(
       'type' => 'array',

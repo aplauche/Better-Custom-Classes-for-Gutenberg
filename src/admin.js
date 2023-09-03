@@ -1,25 +1,33 @@
 
 import './admin.scss'
-import { useEntityProp, useEntityRecord, store as coreStore } from '@wordpress/core-data';
-import { useSelect, useDispatch } from '@wordpress/data';
-import { render, useState, useEffect } from '@wordpress/element';
-import { TextControl, PanelBody, PanelRow, Button } from '@wordpress/components';
+import { useEntityProp, store as coreStore } from '@wordpress/core-data';
+import { useDispatch } from '@wordpress/data';
+import { render, useState } from '@wordpress/element';
+import { TextControl, Button } from '@wordpress/components';
 import TokenList from '@wordpress/token-list';
+
+import { useCopyToClipboard } from './modules/hooks';
 
 render(<App />, document.querySelector( '#bccfg-library-app' ));
 
 function App() {
 
   return (
-    <ClassLibraryList />
+    <>
+
+      <ClassLibraryList />
+    </>
   );
 }
 
 function ClassLibraryList(){
 
   const { saveEditedEntityRecord } = useDispatch( coreStore );
-  const [classLibrary, setClassLibrary] = useEntityProp('root', 'site', 'bccfg_class_library');
+  const [classLibrary, setClassLibrary, ] = useEntityProp('root', 'site', 'bccfg_class_library');
   const [ customClassInput, setCustomClassInput ] = useState( "" );
+  const [ hasCopied, setHasCopied ] = useState( false );
+  const [copiedText, copy] = useCopyToClipboard();
+
 
   // utility to convert array to tokenlist and return it
   const tokenizedClassLibrary = () => {
@@ -82,10 +90,19 @@ function ClassLibraryList(){
     });
   }
 
+  const handleCopy = () => {
+    setHasCopied(true)
+    copy(classLibrary.join(" "))
+    setTimeout(() => {
+      setHasCopied(false)
+    }, 2000)
+  }
+
   return (
     <>
       <TextControl
-        label="Add a class then press space or enter"
+        label="Add classes seperated by commas or spaces"
+        placeholder='Enter a class...'
         value={customClassInput}
         onChange={(value) => {
           setCustomClassInput(value);
@@ -93,8 +110,10 @@ function ClassLibraryList(){
         onKeyDown={onKeyDown}
       />
 
+
+
       <div className="better-custom-classes__pill-group">
-        {classLibrary ? 
+        {classLibrary && classLibrary.length > 0 ? 
           sortAlphaCaseInsensitive(classLibrary).map((item, idx) => (
             // TODO: Check agaist regex and add an error class to highlight if classname contains illegal chars
             <div key={idx} className={`better-custom-classes__pill`}>
@@ -113,9 +132,26 @@ function ClassLibraryList(){
             </div>
           )
         ) : (
-          <p>loading</p>
+          <>
+            
+          </>
         )}
       </div>
+
+      {classLibrary && classLibrary.length > 0 ? (
+        <div>
+          <p>Want to import your classes to another site?</p>
+          <Button
+            className='button button-primary'
+            onClick={() => handleCopy()}
+          >
+            { hasCopied ? 'Copied!' : 'Copy All Classes To Clipboard' }
+          </Button>
+        </div>
+      ) : (
+        <></>
+      )}
+
     </>
   )
 }
