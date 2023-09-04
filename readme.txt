@@ -25,6 +25,12 @@ Clicking the star icon on a class will toggle whether to include it in your clas
 
 == Changelog ==
 
+= 0.2.0 =
+* Overhaul class library management screen to be React powered instead of settings API
+* Convert to using TokenList for management
+* Fix bug with REST API endpoint (add schema)
+* Add comma seperated support for class field
+
 = 0.1.3 =
 * Add colon to supported class characters for tailwind utils etc.
 
