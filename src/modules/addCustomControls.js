@@ -1,16 +1,17 @@
 import { InspectorControls } from '@wordpress/block-editor';
 import { TextControl, PanelBody, PanelRow, Button } from '@wordpress/components';
-import { Icon, starFilled, starEmpty } from '@wordpress/icons';
 
 import { useState, Fragment, useEffect } from '@wordpress/element';
 
 import { store as blocksStore } from '@wordpress/blocks';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useEntityProp, store as coreStore } from '@wordpress/core-data';
+import { store as coreStore } from '@wordpress/core-data';
 
 import TokenList from '@wordpress/token-list';
 
 import { useCopyToClipboard } from './hooks';
+import RememberClassButton from './RememberClassButton';
+import ClassSuggestions from './ClassSuggestions';
 
 
 
@@ -21,27 +22,24 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
     // destructure block info
     const { name, attributes, setAttributes, isSelected } = props;
 
-      // Check for block support and bail out if none exists
-      const blockSupportValue = useSelect(
-        ( select ) =>
-            select( blocksStore ).getBlockSupport( name, 'customClassName' ),
-        [name]
-      );
+    // Check for block support and bail out if none exists
+    const blockSupportValue = useSelect(
+      ( select ) =>
+          select( blocksStore ).getBlockSupport( name, 'customClassName' ),
+      [name]
+    );
 
-      const canAdmin = useSelect(
-        ( select ) =>
-            select( 'core' ).canUser( 'create', 'settings' ),
-        []
-      );
-      
-      if(canAdmin === false){
-        return <BlockEdit {...props} />
-      }
-  
-      if(blockSupportValue === false){
-        // Bail out - no support
-        return <BlockEdit {...props} />
-      }
+    if(blockSupportValue === false){
+      // Bail out - no support
+      return <BlockEdit {...props} />
+    }
+
+    // Check if we can fetch settings as admin - otherwise no autocomplete/memory function
+    const canAdmin = useSelect(
+      ( select ) =>
+          select( 'core' ).canUser( 'create', 'settings' ),
+      []
+    );
   
 
 	
@@ -49,14 +47,11 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
     const [ customClassInput, setCustomClassInput ] = useState( "" );
     const [copiedText, copy] = useCopyToClipboard();
 
-    const { saveEditedEntityRecord } = useDispatch( coreStore );
 
     // Regex to validate classes added do not contain illegal characters
     const regexp = /^[a-zA-Z0-9-_:]+$/;
 
-    // Access class library for autocomplete
-    const [classLibrary, setClassLibrary] = useEntityProp('root', 'site', 'bccfg_class_library')
-    const [suggestions, setSuggestions] = useState([])
+
 
     // UTILITY FUNCTIONS
 
@@ -70,26 +65,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       return []
     }
 
-    // Filter possible suggestions
-    useEffect(() => {
-      if(customClassInput.length > 2){
 
-        // only classes that match input - we lowercase all just to include suggestions that are not case matched
-        let filtered = classLibrary?.filter(item => {
-          return item.toLowerCase().includes(customClassInput.toLowerCase())
-        })
-
-        // only classes that aren't already there
-        filtered = filtered.filter(item => {
-          return !currentClassArray().includes(item)
-        })
-
-        setSuggestions(filtered)
-      } else {
-        setSuggestions([])
-      }
-
-    }, [customClassInput, classLibrary])
 
     // Listen to keydown and add classes on spacebar or enter or comma key
     const onKeyDown = (e) => {
@@ -134,39 +110,6 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       setAttributes({className: blockClassList.value})
     }
 
-
-    // Handlers for the remember/don't remember logic
-
-    const updateLibrary = (newLibrary) => {
-      setClassLibrary(newLibrary)
-      saveEditedEntityRecord( 'root', 'site', undefined, {
-        bccfg_class_library: newLibrary,
-      } );
-    }
-
-    const handleRememberClick = (item) => {
-        // If no classes exist yet just add directly
-        if(!classLibrary || classLibrary.length < 1){
-          updateLibrary([item])
-          return;
-        }
-
-        // otherwise merge into array
-        let classLibraryTokenList = new TokenList(classLibrary.join(" "))
-        classLibraryTokenList.add(item)
-
-        const newArray = classLibraryTokenList.value.split(" ")
-        
-        updateLibrary(newArray)
-    }
-
-    const handleDontRememberClick = (item) => {
-      const newArray = classLibrary.filter(term => {
-        return term !== item
-      })
-      updateLibrary(newArray)
-    }
-
     const handleCopy = () => {
       setHasCopied(true)
       copy(attributes.className)
@@ -192,13 +135,10 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
                   }}
                   onKeyDown={onKeyDown}
                 />
-                <ul className='bccfg-suggestions'>
-                  {suggestions.map(term => (
-                    <li key={term} onClick={() => handleSuggestionClick(term)}>
-                      {term}
-                    </li>
-                  ))}
-                </ul>              
+                {canAdmin && (
+                  <ClassSuggestions currentClassArray={currentClassArray} inputValue={customClassInput} handleClick={handleSuggestionClick}/>
+                )}
+           
                 </div>
 
                 
@@ -208,10 +148,8 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
                   {currentClassArray().map((item, idx) => (
                     // Check agaist regex and add an error class to highlight if classname contains illegal chars
                     <div key={idx} className={`better-custom-classes__pill ${item.search(regexp) === -1 ? 'better-custom-classes__pill--error' : ''}`}>
-                      {classLibrary && classLibrary.includes(item) ? (
-                        <Icon width={20} height={20} icon={ starFilled } onClick={() => handleDontRememberClick(item)}/>
-                      ) : (
-                        <Icon width={20} height={20} icon={ starEmpty } onClick={() => handleRememberClick(item)}/>
+                      {canAdmin && (
+                        <RememberClassButton item={item} />
                       )}
                       {item}
                       <svg className="better-custom-classes__pill-delete" version="1.1" x="0px" y="0px"
