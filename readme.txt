@@ -25,6 +25,9 @@ Clicking the star icon on a class will toggle whether to include it in your clas
 
 == Changelog ==
 
+= 0.2.1 =
+* Patch fatal bug in block editor for non-admins
+
 = 0.2.0 =
 * Overhaul class library management screen to be React powered instead of settings API
 * Convert to using TokenList for management
