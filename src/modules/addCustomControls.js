@@ -18,7 +18,33 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 
 	return (props) => {
 
-		const { name, attributes, setAttributes, isSelected } = props;
+    // destructure block info
+    const { name, attributes, setAttributes, isSelected } = props;
+
+      // Check for block support and bail out if none exists
+      const blockSupportValue = useSelect(
+        ( select ) =>
+            select( blocksStore ).getBlockSupport( name, 'customClassName' ),
+        [name]
+      );
+
+      const canAdmin = useSelect(
+        ( select ) =>
+            select( 'core' ).canUser( 'create', 'settings' ),
+        []
+      );
+      
+      if(canAdmin === false){
+        return <BlockEdit {...props} />
+      }
+  
+      if(blockSupportValue === false){
+        // Bail out - no support
+        return <BlockEdit {...props} />
+      }
+  
+
+	
     const [ hasCopied, setHasCopied ] = useState( false );
     const [ customClassInput, setCustomClassInput ] = useState( "" );
     const [copiedText, copy] = useCopyToClipboard();
@@ -43,19 +69,6 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
 
       return []
     }
-
-    // Check for block support and bail out if none exists
-    const blockSupportValue = useSelect(
-      ( select ) =>
-          select( blocksStore ).getBlockSupport( name, 'customClassName' ),
-      [name]
-    );
-
-    if(blockSupportValue === false){
-      // Bail out - no support
-      return <BlockEdit {...props} />
-    }
-
 
     // Filter possible suggestions
     useEffect(() => {
