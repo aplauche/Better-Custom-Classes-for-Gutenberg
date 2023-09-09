@@ -9,9 +9,10 @@ import { store as coreStore } from '@wordpress/core-data';
 
 import TokenList from '@wordpress/token-list';
 
-import { useCopyToClipboard } from './hooks';
+
 import RememberClassButton from './RememberClassButton';
 import ClassSuggestions from './ClassSuggestions';
+import CopyButton from './CopyButton';
 
 
 
@@ -41,12 +42,8 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       []
     );
   
-
-	
-    const [ hasCopied, setHasCopied ] = useState( false );
+    // Controlled input for custom class
     const [ customClassInput, setCustomClassInput ] = useState( "" );
-    const [copiedText, copy] = useCopyToClipboard();
-
 
     // Regex to validate classes added do not contain illegal characters
     const regexp = /^[a-zA-Z0-9-_:]+$/;
@@ -65,21 +62,20 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       return []
     }
 
-
-
-    // Listen to keydown and add classes on spacebar or enter or comma key
+    // Listen to keydown event 
     const onKeyDown = (e) => {
       if(customClassInput.trim().length){
 
-        // Create token list of input and current library
-        let classesToAdd = new TokenList(customClassInput)
-        let blockClassList = new TokenList(attributes.className)
-
-        // add in tokens from input (automatically handles duplicates)
-        blockClassList.add(classesToAdd)
-  
+        // add classes on spacebar or enter or comma key
         if ((e.keyCode === 32 || e.keyCode === 13 || e.keyCode === 188)) {
           e.preventDefault();
+
+          // Create token list of input and current library
+          let classesToAdd = new TokenList(customClassInput) // could paste in multiple at once
+          let blockClassList = new TokenList(attributes.className)
+
+          // add in tokens from input (automatically handles duplicates)
+          blockClassList.add(classesToAdd)
 
           // Merge in new classes
           setAttributes({className: blockClassList.value})
@@ -88,6 +84,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
           setCustomClassInput("")
 
         }
+
       }
     };
 
@@ -108,14 +105,6 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
       blockClassList.remove(deletedClass)
 
       setAttributes({className: blockClassList.value})
-    }
-
-    const handleCopy = () => {
-      setHasCopied(true)
-      copy(attributes.className)
-      setTimeout(() => {
-        setHasCopied(false)
-      }, 2000)
     }
 
 		return (
@@ -168,14 +157,9 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
                 </div>
               </PanelRow>
               {currentClassArray().length > 0 && 
-                // If custom classes exist show a copy to clipboard button to allow easy copying between blocks
+                // If custom classes exist - show a copy to clipboard button to allow easy copying between blocks
                 <PanelRow>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleCopy()}
-                  >
-                    { hasCopied ? 'Copied!' : 'Copy All Classes' }
-                  </Button>
+                  <CopyButton textToCopy={attributes.className} />
                 </PanelRow>
               }
             </PanelBody>
