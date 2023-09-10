@@ -117,6 +117,7 @@ const addCustomControls = wp.compose.createHigherOrderComponent((BlockEdit) => {
                 <div style={{position: "relative"}}>
 
                 <TextControl
+                  className="bccfg-class-input"
                   label="Add a class then press space or enter"
                   value={customClassInput}
                   onChange={(value) => {

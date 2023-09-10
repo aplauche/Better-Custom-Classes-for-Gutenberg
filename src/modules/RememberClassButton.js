@@ -52,9 +52,9 @@ const RememberClassButton = ({item}) => {
   return (
     <>
       {classLibrary && classLibrary?.includes(item) ? (
-        <Icon width={20} height={20} icon={ starFilled } onClick={() => handleDontRememberClick(item)}/>
+        <Icon className="bccfg-unstar" width={20} height={20} icon={ starFilled } onClick={() => handleDontRememberClick(item)}/>
       ) : (
-        <Icon width={20} height={20} icon={ starEmpty } onClick={() => handleRememberClick(item)}/>
+        <Icon className="bccfg-star" width={20} height={20} icon={ starEmpty } onClick={() => handleRememberClick(item)}/>
       )}
     </>
   )
