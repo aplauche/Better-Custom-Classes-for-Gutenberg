@@ -2,7 +2,7 @@
 import './admin.scss'
 import { useEntityProp, store as coreStore } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
-import { render, useState } from '@wordpress/element';
+import { render, useState, useEffect } from '@wordpress/element';
 import { TextControl, Button } from '@wordpress/components';
 import TokenList from '@wordpress/token-list';
 
@@ -26,6 +26,14 @@ function ClassLibraryList(){
   const [ customClassInput, setCustomClassInput ] = useState( "" );
   const [ hasCopied, setHasCopied ] = useState( false );
   const [copiedText, copy] = useCopyToClipboard();
+  const [loaded, setLoaded] = useState(false)
+
+  // Check if we've loaded in the class library - this should be easier...
+  useEffect(() => {
+    if(loaded === false && Array.isArray(classLibrary)){
+      setLoaded(true)
+    }
+  }, [classLibrary])
 
 
   // utility to convert array to tokenlist and return it
@@ -110,7 +118,6 @@ function ClassLibraryList(){
       />
 
 
-
       <div className="better-custom-classes__pill-group">
         {classLibrary && classLibrary.length > 0 ? 
           sortAlphaCaseInsensitive(classLibrary).map((item, idx) => (
@@ -131,9 +138,11 @@ function ClassLibraryList(){
             </div>
           )
         ) : (
-          <>
-            
-          </>
+          !loaded ? (
+            <div>Loading class library...</div>
+          ) : (
+            <div>No saved classes yet...</div>
+          )
         )}
       </div>
 

@@ -25,6 +25,9 @@ Clicking the star icon on a class will toggle whether to include it in your clas
 
 == Changelog ==
 
+= 0.2.2 =
+* Adds a loading state for settings screen
+
 = 0.2.1 =
 * Patch fatal bug in block editor for non-admins
 
